@@ -1,46 +1,60 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts;
 using System;
-using System.Net;
+using UnityEngine;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 
 public class EyesBehaviourScript : MonoBehaviour
 {
+    public Camera camera;
     private Animator anim { get; set; }
     private bool state { get; set; }
     private string[] names { get; set; }
     private MqttClient client;
-    private int option;
+    private Data message;
+
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         anim = GetComponent<Animator>();
         names = new[] { "Angry 0", "Bored 0", "Sad 0", "Happy 0", "Surprised 0" };
         state = true;
-        option = 0;
+        message = new Data();
 
-        client = new MqttClient("broker.hivemq.com", 1883, false, null);
+        client = new MqttClient("127.0.0.1", 1883, false, null);
 
-        // register to message received 
+        // register to message received
         client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
 
         string clientId = Guid.NewGuid().ToString();
         client.Connect(clientId);
 
-        // subscribe to the topic "/home/temperature" with QoS 2 
-        client.Subscribe(new string[] { "disi/emotion" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
+        // subscribe to the topic "/home/temperature" with QoS 2
+        client.Subscribe(new string[] { "eve/eyes" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
     }
 
-    void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
+    private void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
     {
-        option = int.Parse(System.Text.Encoding.UTF8.GetString(e.Message));
-        Debug.Log("Received: " + System.Text.Encoding.UTF8.GetString(e.Message));
+        var mqtt = System.Text.Encoding.UTF8.GetString(e.Message);
+        //{"anim":"ini","bcolor":"blue","extra":false}
+        //Debug.Log("Received: " + mqtt);
+        message = JsonUtility.FromJson<Data>(mqtt);
     }
 
     // Update is called once per frame
-    void Update()
-    {       
+    private void Update()
+    {
         var temp = anim.GetCurrentAnimatorStateInfo(0);
+
+        if (!string.IsNullOrEmpty(message.bcolor))
+        {
+            camera.backgroundColor = message.getValueOfBColor();
+        }
+
+        if (temp.IsName("Blink"))
+        {
+            message = new Data();
+        }
 
         if (!temp.IsName("New State"))
         {
@@ -51,30 +65,10 @@ public class EyesBehaviourScript : MonoBehaviour
             if (!temp.IsName(names[0]) && !temp.IsName(names[1]) && !temp.IsName(names[2]) && !temp.IsName(names[3]) && !temp.IsName(names[4]) && state)
             {
                 state = false;
-                option = 0;
-                anim.SetInteger("Option", option);
+                message = new Data();
+                anim.SetInteger("Option", message.getValueOfAnim());
             }
         }
-
-        //if (Input.GetKey(KeyCode.A))
-        //{
-        anim.SetInteger("Option", option);
-        //}
-        //if (Input.GetKey(KeyCode.B))
-        //{
-        //    anim.SetInteger("Option", 2);
-        //}
-        //if (Input.GetKey(KeyCode.S))
-        //{
-        //    anim.SetInteger("Option", 3);
-        //}
-        //if (Input.GetKey(KeyCode.H))
-        //{
-        //    anim.SetInteger("Option", 4);
-        //}
-        //if (Input.GetKey(KeyCode.U))
-        //{
-        //    anim.SetInteger("Option", 5);
-        //}
+        anim.SetInteger("Option", message.getValueOfAnim());
     }
 }

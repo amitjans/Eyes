@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Eva.unity
+    guid: 80b67efd451985f4c950dc85f557b5b8
   m_configObjects: {}
