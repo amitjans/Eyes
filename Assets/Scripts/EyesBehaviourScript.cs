@@ -108,6 +108,12 @@ public class EyesBehaviourScript : MonoBehaviour
             camera.backgroundColor = message.getValueOfBColor();
         }
 
+        if (message.anim.Equals("exit"))
+        {
+            client.Disconnect();
+            Application.Quit();
+        }
+
         if (temp.IsName("Blink"))
         {
             message = new Data();
