@@ -5,12 +5,14 @@ using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 
 public class EyesBehaviourScript : MonoBehaviour
 {
     public Camera camera;
+    public Text text;
     private Animator anim { get; set; }
     private bool state { get; set; }
     private string[] names { get; set; }
@@ -45,56 +47,57 @@ public class EyesBehaviourScript : MonoBehaviour
 
     IEnumerator Fade()
     {
-        //try
-        //{
-        //    client = new MqttClient("192.168.0.8", 1883, false, null);
-        //    // register to message received
-        //    client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
-        //    client.Connect(clientId);
-        //    server = true;
-        //}
-        //catch (Exception e)
-        //{
-        //    Debug.Log(e.Message);
-        //    Debug.Log(address);
-        //    server = false;
-        //}
+        var save = new Save();
+        if (LoadAndSave.DataSaved())
+        {
+            save = LoadAndSave.LoadData();
+            //Debug.Log(save.List[0]);
+            if (!string.IsNullOrEmpty(save.GiveMe(address)))
+            {
+                try
+                {
+                    var addr = save.GiveMe(address);
+                    client = new MqttClient(addr, 1883, false, null);
+                    // register to message received
+                    client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
+                    client.Connect(clientId);
+                    client.Subscribe(new string[] { "eve/eyes" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
+                    message = new Data() { anim = "blink", bcolor = "", extra = false };
+                    server = true;
+                    text.text = addr;
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+            }
+        }
 
-        var ip = 2;
-        while (!server)
+
+        var temp = address.Substring(0, address.LastIndexOf("."[0]) + 1);
+        for (var ip = 2; ip < 255 && !server; ip++)
         {
             try
             {
-                var temp = address.Split("."[0]);
-                var aux = temp[0] + "." + temp[1] + "." + temp[2] + "." + ip;
-                Debug.Log(aux);
-                client = new MqttClient(aux, 1883, false, null);
+                text.text = temp + ip;
+                Debug.Log(temp + ip);
+                client = new MqttClient(temp + ip, 1883, false, null);
                 // register to message received
                 client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
                 client.Connect(clientId);
                 client.Subscribe(new string[] { "eve/eyes" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
-                message = new Data() { anim = "blink", bcolor = "", extra = false};
+                message = new Data() { anim = "blink", bcolor = "", extra = false };
                 server = true;
+                save.Add(temp + ip);
+                LoadAndSave.SaveData(save);
             }
             catch (Exception e)
             {
                 Debug.Log(e.Message);
-                server = false;
-                if (ip < 255)
-                {
-                    ip++;
-                }
-                else
-                {
-                    server = true;
-                }
             }
             yield return new WaitForSeconds(.001f);
         }
-
-        // subscribe to the topic "/home/temperature" with QoS 2
-        
-
+        text.text = "";
         yield return null;
     }
 
