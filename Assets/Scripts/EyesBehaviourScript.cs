@@ -1,10 +1,7 @@
 ﻿using Assets.Scripts;
 using System;
 using System.Collections;
-using System.Net;
-using System.Net.Sockets;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
@@ -13,9 +10,8 @@ public class EyesBehaviourScript : MonoBehaviour
 {
     public Camera camera;
     public Text text;
+    public Animator extras;
     private Animator anim { get; set; }
-    private bool state { get; set; }
-    private string[] names { get; set; }
     private MqttClient client;
     private Data message;
 
@@ -23,18 +19,18 @@ public class EyesBehaviourScript : MonoBehaviour
     private bool server;
     private string address;
     private string clientId;
+    private bool msg;
 
     // Start is called before the first frame update
     [Obsolete]
     private void Start()
     {
         anim = GetComponent<Animator>();
-        names = new[] { "Angry 0", "Bored 0", "Sad 0", "Happy 0", "Surprised 0" };
-        state = true;
         message = new Data();
         first = true;
         server = false;
-        address = GetLocalIPAddress();
+        msg = false;
+        address = LocalIpAddress.GetLocalIPAddress();
         clientId = Guid.NewGuid().ToString();
     }
 
@@ -43,15 +39,15 @@ public class EyesBehaviourScript : MonoBehaviour
         var mqtt = System.Text.Encoding.UTF8.GetString(e.Message);
         //{"anim":"ini","bcolor":"blue","extra":false}
         message = JsonUtility.FromJson<Data>(mqtt);
+        msg = true;
     }
 
-    IEnumerator Fade()
+    private IEnumerator Fade()
     {
         var save = new Save();
         if (LoadAndSave.DataSaved())
         {
             save = LoadAndSave.LoadData();
-            //Debug.Log(save.List[0]);
             if (!string.IsNullOrEmpty(save.GiveMe(address)))
             {
                 try
@@ -72,7 +68,6 @@ public class EyesBehaviourScript : MonoBehaviour
                 }
             }
         }
-
 
         var temp = address.Substring(0, address.LastIndexOf("."[0]) + 1);
         for (var ip = 2; ip < 255 && !server; ip++)
@@ -97,7 +92,6 @@ public class EyesBehaviourScript : MonoBehaviour
             }
             yield return new WaitForSeconds(.001f);
         }
-        text.text = "";
         yield return null;
     }
 
@@ -120,47 +114,29 @@ public class EyesBehaviourScript : MonoBehaviour
         if (temp.IsName("Blink"))
         {
             message = new Data();
+            msg = true;
         }
 
-        if (!temp.IsName("New State"))
+        if (msg)
         {
-            if (temp.IsName(names[0]) || temp.IsName(names[1]) || temp.IsName(names[2]) || temp.IsName(names[3]) || temp.IsName(names[4]))
+            anim.SetInteger("Option", message.getValueOfAnim());
+            if (message.extra)
             {
-                state = true;
+                extras.SetInteger("Option", message.getValueOfAnim());
             }
-            if (!temp.IsName(names[0]) && !temp.IsName(names[1]) && !temp.IsName(names[2]) && !temp.IsName(names[3]) && !temp.IsName(names[4]) && state)
-            {
-                state = false;
-                message = new Data();
-                anim.SetInteger("Option", message.getValueOfAnim());
-            }
+            msg = false;
         }
 
         if (first)
         {
-            Debug.Log("first: " + first);
             first = false;
             StartCoroutine("Fade");
         }
         else if (server)
         {
-            Debug.Log("server: " + server);
+            text.text = "";
             StopAllCoroutines();
             server = false;
         }
-        anim.SetInteger("Option", message.getValueOfAnim());
-    }
-
-    public string GetLocalIPAddress()
-    {
-        var host = Dns.GetHostEntry(Dns.GetHostName());
-        foreach (var ip in host.AddressList)
-        {
-            if (ip.AddressFamily == AddressFamily.InterNetwork)
-            {
-                return ip.ToString();
-            }
-        }
-        throw new System.Exception("No network adapters with an IPv4 address in the system!");
     }
 }
