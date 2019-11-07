@@ -38,6 +38,10 @@ namespace Assets.Scripts
             {
                 return 9;
             }
+            else if (this.anim.Equals("surprise"))
+            {
+                return 5;
+            }
             else
             {
                 return 0;
