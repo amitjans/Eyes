@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
+using Random = UnityEngine.Random;
 
 public class EyesBehaviourScript : MonoBehaviour
 {
@@ -20,6 +21,8 @@ public class EyesBehaviourScript : MonoBehaviour
     private string address;
     private string clientId;
     private bool msg;
+    private float noanim;
+    private float nextmax;
 
     // Start is called before the first frame update
     [Obsolete]
@@ -30,6 +33,8 @@ public class EyesBehaviourScript : MonoBehaviour
         first = true;
         server = false;
         msg = false;
+        noanim = 0;
+        nextmax = 0;
         address = LocalIpAddress.GetLocalIPAddress();
         clientId = Guid.NewGuid().ToString();
     }
@@ -58,7 +63,8 @@ public class EyesBehaviourScript : MonoBehaviour
                     client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
                     client.Connect(clientId);
                     client.Subscribe(new string[] { "eve/eyes" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
-                    message = new Data() { anim = "blink", bcolor = "", extra = false };
+                    message = new Data() { anim = "blink", bcolor = "", speed = 1f };
+                    msg = true;
                     server = true;
                     text.text = addr;
                 }
@@ -81,7 +87,8 @@ public class EyesBehaviourScript : MonoBehaviour
                 client.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
                 client.Connect(clientId);
                 client.Subscribe(new string[] { "eve/eyes" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
-                message = new Data() { anim = "blink", bcolor = "", extra = false };
+                message = new Data() { anim = "blink", bcolor = "", speed = 1f };
+                msg = true;
                 server = true;
                 save.Add(temp + ip);
                 LoadAndSave.SaveData(save);
@@ -98,8 +105,6 @@ public class EyesBehaviourScript : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        var temp = anim.GetCurrentAnimatorStateInfo(0);
-
         if (!string.IsNullOrEmpty(message.bcolor))
         {
             camera.backgroundColor = message.getValueOfBColor();
@@ -111,21 +116,29 @@ public class EyesBehaviourScript : MonoBehaviour
             Application.Quit();
         }
 
-        if (temp.IsName("Blink"))
+        if (anim.GetCurrentAnimatorStateInfo(0).IsName("Blink"))
         {
-            message = new Data();
-            msg = true;
+            anim.SetInteger("Option", 0);
         }
 
         if (msg)
         {
+            anim.speed = message.speed;
             anim.SetInteger("Option", message.getValueOfAnim());
-            if (message.extra)
-            {
-                extras.SetInteger("Option", message.getValueOfAnim());
-            }
             msg = false;
+            noanim = 0;
         }
+        else if (anim.GetCurrentAnimatorStateInfo(0).IsName("New State"))
+        {
+            noanim += Time.deltaTime;
+            if (noanim >= nextmax)
+            {
+                anim.SetInteger("Option", 9);
+                noanim = 0;
+                nextmax = Random.Range(4f, 7f);
+            }
+        }
+        Debug.Log(noanim);
 
         if (first)
         {

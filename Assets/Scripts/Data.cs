@@ -7,13 +7,13 @@ namespace Assets.Scripts
     {
         public string anim;
         public string bcolor;
-        public bool extra;
+        public float speed;
 
         public Data()
         {
             this.anim = "";
             this.bcolor = "";
-            this.extra = false;
+            this.speed = 1f;
         }
 
         public int getValueOfAnim()
@@ -41,6 +41,38 @@ namespace Assets.Scripts
             else if (this.anim.Equals("surprise"))
             {
                 return 5;
+            }
+            else if (this.anim.Equals("up"))
+            {
+                return 2;
+            }
+            else if (this.anim.Equals("down"))
+            {
+                return 6;
+            }
+            else if (this.anim.Equals("ur"))
+            {
+                return 7;
+            }
+            else if (this.anim.Equals("ul"))
+            {
+                return 8;
+            }
+            else if (this.anim.Equals("dr"))
+            {
+                return 11;
+            }
+            else if (this.anim.Equals("dl"))
+            {
+                return 12;
+            }
+            else if (this.anim.Equals("right"))
+            {
+                return 13;
+            }
+            else if (this.anim.Equals("left"))
+            {
+                return 14;
             }
             else
             {
