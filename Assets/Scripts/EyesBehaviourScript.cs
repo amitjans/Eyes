@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using socket.io;
+using UnityEngine.UI;
 
 public class EyesBehaviourScript : MonoBehaviour
 {
@@ -25,7 +26,27 @@ public class EyesBehaviourScript : MonoBehaviour
         noanim = 0;
         nextmax = 0;
 
-        var serverUrl = "http://158.97.91.105:3000";
+        //var serverUrl = "http://158.97.91.105:3000";
+        //var socket = Socket.Connect(serverUrl);
+
+        //// receive "news" event
+        //socket.On("messages", (string data) => {
+        //    Debug.Log(data);
+        //    if (data.Contains("anim"))
+        //    {
+        //        message = JsonUtility.FromJson<Data>(data);
+        //        msg = true;
+        //    }
+        //});
+        GameObject.Find("Network").GetComponent<Text>().text = LocalIpAddress.GetNetWork();
+    }
+
+    public void Connect()
+    {
+        var ip = GameObject.Find("LastNumber").GetComponent<InputField>().text;
+        GameObject.Find("Direccion").SetActive(false);
+
+        var serverUrl = "http://" + LocalIpAddress.GetNetWork() + ip + ":3000";
         var socket = Socket.Connect(serverUrl);
 
         // receive "news" event

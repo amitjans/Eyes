@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Net.Sockets;
 
 namespace Assets.Scripts
@@ -16,6 +17,12 @@ namespace Assets.Scripts
                 }
             }
             throw new System.Exception("No network adapters with an IPv4 address in the system!");
+        }
+
+        public static string GetNetWork()
+        {
+            var strings = GetLocalIPAddress().Split("."[0]);
+            return strings[0] + "." + strings[1] + "." + strings[2] + ".";
         }
     }
 }
