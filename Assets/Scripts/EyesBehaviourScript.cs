@@ -8,7 +8,6 @@ using UnityEngine.UI;
 public class EyesBehaviourScript : MonoBehaviour
 {
     public Camera camera;
-    public Animator extras;
     private Animator anim { get; set; }
     private Data message;
 
@@ -92,7 +91,7 @@ public class EyesBehaviourScript : MonoBehaviour
             {
                 anim.SetInteger("Option", 9);
                 noanim = 0;
-                nextmax = Random.Range(4f, 7f);
+                nextmax = Random.Range(2f, 5f);
             }
         }
     }
