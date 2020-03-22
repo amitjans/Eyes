@@ -77,7 +77,7 @@ public class EyesBehaviourScript : MonoBehaviour
             anim.SetInteger("Option", 0);
         }
 
-        if (msg)
+        if (msg && !anim.GetCurrentAnimatorStateInfo(0).IsName("Blink"))
         {
             anim.speed = message.speed;
             anim.SetInteger("Option", message.getValueOfAnim());
