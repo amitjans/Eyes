@@ -91,7 +91,7 @@ public class EyesBehaviourScript : MonoBehaviour
             {
                 anim.SetInteger("Option", 9);
                 noanim = 0;
-                nextmax = Random.Range(2f, 5f);
+                nextmax = Random.Range(5f, 7f);
             }
         }
     }
