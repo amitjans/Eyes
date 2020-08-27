@@ -24,28 +24,14 @@ public class EyesBehaviourScript : MonoBehaviour
         msg = false;
         noanim = 0;
         nextmax = 0;
-
-        //var serverUrl = "http://158.97.91.105:3000";
-        //var socket = Socket.Connect(serverUrl);
-
-        //// receive "news" event
-        //socket.On("messages", (string data) => {
-        //    Debug.Log(data);
-        //    if (data.Contains("anim"))
-        //    {
-        //        message = JsonUtility.FromJson<Data>(data);
-        //        msg = true;
-        //    }
-        //});
-        GameObject.Find("Network").GetComponent<Text>().text = LocalIpAddress.GetNetWork();
+        Connect();
     }
 
     public void Connect()
     {
-        var ip = GameObject.Find("LastNumber").GetComponent<InputField>().text;
-        GameObject.Find("Direccion").SetActive(false);
-
-        var serverUrl = "http://" + LocalIpAddress.GetNetWork() + ip + ":3000";
+        var temp = Application.absoluteURL;
+        var serverUrl = (temp.EndsWith("/") ? temp.Substring(0, temp.Length - 1) : temp) + ":3000";
+        Debug.Log("Ip: " + serverUrl);
         var socket = Socket.Connect(serverUrl);
 
         // receive "news" event
