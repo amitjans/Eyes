@@ -30,7 +30,8 @@ public class EyesBehaviourScript : MonoBehaviour
     public void Connect()
     {
         var temp = Application.absoluteURL;
-        var serverUrl = (temp.EndsWith("/") ? temp.Substring(0, temp.Length - 1) : temp) + ":3000";
+        //var serverUrl = (temp.EndsWith("/") ? temp.Substring(0, temp.Length - 1) : temp) + ":3000";
+        var serverUrl = "http://127.0.0.1:3000";
         Debug.Log("Ip: " + serverUrl);
         var socket = Socket.Connect(serverUrl);
 
@@ -80,5 +81,10 @@ public class EyesBehaviourScript : MonoBehaviour
                 nextmax = Random.Range(5f, 7f);
             }
         }
+    }
+
+    public void FullScreen()
+    {
+        Screen.fullScreen = !Screen.fullScreen;
     }
 }

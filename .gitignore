@@ -61,3 +61,8 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+Ojos/Build/Ojos.data
+Ojos/Build/Ojos.framework.js
+Ojos/Build/Ojos.loader.js
+Ojos/Build/Ojos.wasm
+Ojos/index.html
